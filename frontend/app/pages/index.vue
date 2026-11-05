@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Activity, BarChart3, CircleHelp, Database, GitCompareArrows, Leaf, MapPinned, ShieldCheck, Satellite, FlaskConical, ArrowUpRight, RefreshCw, Layers3, BookOpen, Trees, TriangleAlert } from 'lucide-vue-next'
+import { Activity, BarChart3, CircleHelp, Database, GitCompareArrows, Leaf, MapPinned, ShieldCheck, Satellite, FlaskConical, ArrowUpRight, RefreshCw, ClipboardPlus, Layers3, BookOpen, Trees, TriangleAlert } from 'lucide-vue-next'
 type Model = {model:string,rmse_mg_ha:number,mae_mg_ha:number,r2:number}
 type Overview = {data_mode:string,sample_count:number,mean_predicted_agbd_mg_ha:number,mean_reference_agbd_mg_ha:number,mean_interval_width_mg_ha:number,interval_coverage:number|null,nominal_coverage:number|null,models:Model[],caveats:string[]}
 const config=useRuntimeConfig()
@@ -39,6 +39,7 @@ async function reload(){await Promise.all([refreshHealth(),refreshSummary(),refr
       <button class="nav-item" :class="{active:active==='overview'}" @click="navigate('overview')"><BarChart3 :size="17"/> Overview</button>
       <button class="nav-item" :class="{active:active==='map'}" @click="navigate('map')"><MapPinned :size="17"/> Geo Explorer</button>
       <button class="nav-item" :class="{active:active==='models'}" @click="navigate('models')"><FlaskConical :size="17"/> Research Lab</button>
+      <NuxtLink class="nav-item" to="/observe"><ClipboardPlus :size="17"/> New Observation <span class="nav-tag">Try it</span></NuxtLink>
       <button class="nav-item" disabled title="Future research module"><TriangleAlert :size="17"/> Carbon Risk <span class="nav-tag">Soon</span></button>
       <div class="group-label" style="margin-top:26px">Research assets</div>
       <a class="nav-item" href="https://github.com/himani046/CarbonFusion-AI" target="_blank" rel="noopener"><BookOpen :size="17"/> Documentation <ArrowUpRight :size="13" style="margin-left:auto"/></a>
@@ -56,6 +57,7 @@ async function reload(){await Promise.all([refreshHealth(),refreshSummary(),refr
       </div>
     </header>
     <div class="eyebrow">EARTH OBSERVATION · AI RESEARCH PLATFORM</div>
+    <NuxtLink to="/observe" class="observation-cta">+ Create New Observation →</NuxtLink>
     <h1 class="page-title">Forest Carbon Intelligence<span style="color:#83dba8">.</span></h1>
     <p class="intro">Explore geographically held-out forest biomass estimates, understand model accuracy and quantify prediction uncertainty. Built on Sentinel-2 features and NASA GEDI-derived reference observations.</p>
     <div class="banner" v-if="isDemo"><strong>RESEARCH DEMO:</strong> The current training outputs are synthetic or missing. These values and map points are not real forest carbon measurements. No deforestation forecast is implemented.</div>
