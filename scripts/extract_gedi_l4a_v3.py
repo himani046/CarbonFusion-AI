@@ -71,17 +71,24 @@ def extract_one(path, bbox, max_relative_se):
                 d,source=find_array(beam,candidates,n)
                 if d is None and col in SENTINEL_REQUIRED:missing.append(col)
                 datasets[col]=(d,source)
-            if missing:
-                report["beams"][beam_name]={"status":"skipped_missing_required",
-                                           "length":n,"missing":missing,
-                                           "paths":{k:v[1] for k,v in datasets.items()}}
+            # Count AOI coordinates before enforcing the product schema.
+            # Otherwise a missing/renamed V3 quality field falsely reports 0 in AOI.
+            lon_ds=datasets["longitude"][0]
+            if lon_ds is None:
+                report["beams"][beam_name]={"status":"skipped_missing_longitude",
+                    "length":n,"paths":{k:v[1] for k,v in datasets.items()}}
                 continue
-            # Only read coordinate arrays first, to minimize memory usage.
             lat=np.asarray(lat_ds[...],dtype=np.float64)
-            lon=np.asarray(datasets["longitude"][0][...],dtype=np.float64)
+            lon=np.asarray(lon_ds[...],dtype=np.float64)
             inside=(np.isfinite(lat)&np.isfinite(lon)&
                     (lat>=south)&(lat<=north)&(lon>=west)&(lon<=east))
             count_inside=int(inside.sum())
+            if missing:
+                report["beams"][beam_name]={"status":"skipped_missing_required",
+                    "length":n,"in_bbox":count_inside,"missing":missing,
+                    "paths":{k:v[1] for k,v in datasets.items()},
+                    "available_top_level":list(beam.keys())}
+                continue
             if count_inside==0:
                 report["beams"][beam_name]={"status":"no_footprints_in_aoi",
                                            "length":n,"in_bbox":0}
@@ -139,6 +146,9 @@ def main():
             table,r=extract_one(f,bbox,args.max_relative_se)
             pieces.append(table);reports.append(r)
             print(f"{f.name}: {r['in_bbox']} in AOI, {r['quality_passed']} passed QC")
+            for bn,bs in r['beams'].items():
+                if bs.get('status')!='processed':
+                    print(f"  {bn}: {bs.get('status')}; in AOI={bs.get('in_bbox','unknown')}; missing={bs.get('missing',[])}")
         except (OSError,ValueError,KeyError) as err:
             reports.append({"file":f.name,"error":str(err)})
             print(f"Could not read {f}: {err}")
@@ -150,7 +160,9 @@ def main():
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.report.parent.mkdir(parents=True,exist_ok=True)
     merged.to_csv(args.output,index=False)
-    summary={"input_files":len(files),"output_rows":len(merged),
+    summary={"input_files":len(files),"total_in_bbox":sum(r.get("in_bbox",0) for r in reports),
+             "skipped_beams":sum(1 for r in reports for v in r.get("beams",{}).values() if v.get("status","").startswith("skipped")),
+             "output_rows":len(merged),
              "duplicates_removed":dupes,"bbox":bbox,
              "is_optical_model_ready":False,
              "next_step":"Join footprints with Sentinel-2 optical features before existing ML training.",

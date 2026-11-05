@@ -43,3 +43,21 @@ Inspect this report before interpreting an empty result: NASA CMR metadata gives
 `latitude, longitude, agbd, agbd_se, l4_quality_flag, degrade_flag, shot_number, delta_time, beam, source_granule, reference_product, observation_date` (optional fields may be absent according to the source HDF5).
 
 Output may legitimately be empty for a particular granule; download additional intersecting granules.
+
+
+## Troubleshooting: 0 in AOI although raw coordinate arrays contain footprints
+
+Some GEDI V3 beam datasets are nested or have different naming/shape from the script's initially expected schema. The extractor **now counts geolocated AOI shots first**, even when required quality/biomass arrays are not found. A beam with incompatible datasets is reported as `skipped_missing_required` with its `missing` fields, `paths` and `available_top_level` in `outputs/gedi_v3_extraction_report.json`. No quality filters are silently disabled.
+
+Run:
+```bash
+python -m scripts.extract_gedi_l4a_v3 --inputs data/gedi_raw --output data/gedi_v3_footprints.csv --report outputs/gedi_v3_extraction_report.json
+python - <<'PY'
+import json
+r=json.load(open('outputs/gedi_v3_extraction_report.json'))
+for granule in r['granules']:
+    for beam,info in granule.get('beams',{}).items():
+        print(beam,info.get('status'),'AOI:',info.get('in_bbox'),'missing:',info.get('missing'))
+PY
+```
+If `total_in_bbox` is positive but `output_rows` is zero, inspect per-beam missing fields rather than downloading unrelated new granules. Do not treat 0 passed QC as 0 geographic observations.
