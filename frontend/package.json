@@ -1,0 +1,23 @@
+{
+  "name": "carbonfusion-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev --host 0.0.0.0",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "nuxt": "^4.2.0",
+    "vue": "^3.5.0",
+    "vue-router": "^4.5.0",
+    "maplibre-gl": "^5.7.0",
+    "echarts": "^6.0.0",
+    "lucide-vue-next": "^0.468.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/geojson": "^7946.0.16"
+  }
+}

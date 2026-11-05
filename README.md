@@ -94,3 +94,29 @@ requirements.txt
 - [Sentinel-2 SR Harmonized](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED)
 - [GEDI L4A V2.1 monthly Earth Engine data](https://developers.google.com/earth-engine/datasets/catalog/LARSE_GEDI_GEDI04_A_002_MONTHLY)
 - [NASA GEDI L4A V3 documentation](https://daac.ornl.gov/GEDI/guides/GEDI_L4A_AGB_Density_V3.html)
+
+
+## New: Nuxt/Vue research dashboard (Phase 1 frontend)
+
+The project now includes a **Nuxt 4 + Vue 3 + MapLibre + Apache ECharts** frontend and a **FastAPI** read-only model-artifact service. The previous Streamlit demo remains intact.
+
+Setup and screenshots guidance: [Frontend setup](docs/FRONTEND_SETUP.md).
+
+Run from repository root:
+
+```bash
+pip install -r requirements.txt -r backend/requirements.txt
+python scripts/make_demo_data.py
+python -m scripts.train
+uvicorn backend.main:app --reload --port 8000
+```
+
+In a second terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Visit http://localhost:3000. Demo model results are **synthetic** until you import and validate real GEDI + Sentinel-2 samples. The map displays held-out **sample points**, not a forest-wide raster. Future deforestation-risk forecasting is **not yet implemented**.
