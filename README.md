@@ -152,3 +152,8 @@ python -m scripts.train --input data/real_samples.csv --output outputs/real
 ```
 
 The extraction/merge scripts cannot automatically download data from your Google account. Sample counts and eventual model accuracy are not guaranteed. GEDI L4A labels remain modeled references; this is not field-validated forest carbon monitoring.
+
+
+### Extended 2018–2026 study window
+
+[Multi-year Earth Engine extraction script](earth_engine/export_2018_2026_window.js) and [availability / run guide](docs/OBSERVATION_WINDOW_2018_2026.md). GEDI L4A monthly labels are currently available only for 2019–mid-2025 in Earth Engine; 2018 and 2026 are **not** GEDI-labeled training periods. Annual exports use GEDI-targeted stratified pixel sampling and need manual task execution in Earth Engine.
