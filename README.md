@@ -120,3 +120,21 @@ npm run dev
 ```
 
 Visit http://localhost:3000. Demo model results are **synthetic** until you import and validate real GEDI + Sentinel-2 samples. The map displays held-out **sample points**, not a forest-wide raster. Future deforestation-risk forecasting is **not yet implemented**.
+
+
+## Phase 1B — Real satellite observations and resilient geospatial explorer
+
+A new Earth Engine script is available at [earth_engine/export_real_monthly_samples.js](earth_engine/export_real_monthly_samples.js). It extracts monthly quality-filtered GEDI L4A V2.1 modeled biomass targets with optical composites from nearby Sentinel-2 acquisition dates, plus terrain features. It is a **research prototype**, not exact GEDI footprint/time colocation.
+
+Follow [docs/REAL_DATA_SETUP.md](docs/REAL_DATA_SETUP.md) to export candidate CSV training data, validate it and train the prototype on actual Earth Engine observations. Real data are not included in the repo because Earth Engine requires user access and cloud exports.
+
+The map includes a coordinate-plot fallback if MapLibre's online basemap tiles cannot load, with interactive held-out sample values. The map is **not a continuous biomass surface**.
+
+```bash
+# After placing your exported data at data/real_samples.csv:
+python -m scripts.validate_real_data --input data/real_samples.csv
+python -m scripts.train --input data/real_samples.csv --output outputs/real
+CARBONFUSION_OUTPUT_DIR="$(pwd)/outputs/real" CARBONFUSION_DATA_MODE=real python -m uvicorn backend.main:app --reload --port 8001
+```
+
+For Nuxt, set `NUXT_PUBLIC_API_BASE=http://localhost:8001` in `frontend/.env`.
