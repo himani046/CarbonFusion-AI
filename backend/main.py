@@ -170,3 +170,38 @@ def predict_observation(payload: ObservationFeatures):
         "prediction_model":"xgboost_optical_terrain",
         "warning":"Preliminary satellite-derived model trained on one GEDI granule; held-out R² is negative. Input features are manually supplied, not automatically retrieved. Intervals are calibrated against GEDI-modeled targets, not independent field truth. No area-wide carbon stock estimate."
     }
+
+class AutomaticLocation(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    longitude: float = Field(ge=-180, le=180)
+    latitude: float = Field(ge=-85, le=85)
+    observation_date: str = Field(min_length=10,max_length=10,pattern=r"^\\d{4}-\\d{2}-\\d{2}$")
+
+@app.post("/api/observations/automatic")
+def automatic_observation(payload: AutomaticLocation):
+    from datetime import date as Date
+    from backend.auto_observation import satellite_features, SourceError
+    try:
+        requested = Date.fromisoformat(payload.observation_date)
+    except ValueError:
+        raise HTTPException(status_code=422, detail="Invalid observation date")
+    if requested > Date.today():
+        raise HTTPException(status_code=422, detail="Observation date cannot be in the future")
+    if requested < Date(2018,1,1):
+        raise HTTPException(status_code=422, detail="This prototype supports dates from 2018 onward")
+    # Fail early if the actual trained booster has not been published.
+    load_inference_bundle()
+    try:
+        features, source = satellite_features(payload.longitude,payload.latitude,payload.observation_date)
+    except SourceError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    body = ObservationFeatures(longitude=payload.longitude, latitude=payload.latitude, **features)
+    prediction = predict_observation(body)
+    prediction["source"]="automatic_sentinel_2_point_sample"
+    prediction["satellite"]=source
+    prediction["spectral_bands"]=features
+    prediction["warning"] += (" Public terrain tiles differ from training SRTM terrain. "
+        "Single pixel sampling is sensitive to canopy mixture/cloud; "
+        "scene date may differ by up to 45 days from requested date. "
+        "No claim of reliable out-of-region accuracy.")
+    return prediction
