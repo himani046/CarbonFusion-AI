@@ -12,8 +12,6 @@ var APPLY_2021_TREE_MASK = true;
 var BANDS = ['B2','B3','B4','B5','B6','B7','B8','B8A','B11','B12'];
 var PROJECTION = ee.Projection('EPSG:32645').atScale(25);
 var GEDI_ID='LARSE/GEDI/GEDI04_A_002_MONTHLY';
-var GEDI_START=ee.Date('2019-03-25');
-var GEDI_END_EXCLUSIVE=ee.Date('2025-07-02'); // cap at catalog availability
 Map.centerObject(AOI,8);
 Map.addLayer(AOI,{color:'yellow'},'Study rectangle (not official forest boundary)');
 var tree=ee.ImageCollection('ESA/WorldCover/v200').first().select('Map').eq(10);
@@ -48,9 +46,10 @@ function monthSamples(year, monthIndex) {
   var veg=s2.normalizedDifference(['B8','B4']).rename('ndvi')
     .addBands(s2.normalizedDifference(['B8','B11']).rename('ndmi'))
     .addBands(s2.normalizedDifference(['B8A','B5']).rename('ndre'));
+  // Earth Engine filterDate handles years outside the catalog without date clamps.
   var gediImages=ee.ImageCollection(GEDI_ID)
     .filterBounds(AOI)
-    .filterDate(from.max(GEDI_START),to.min(GEDI_END_EXCLUSIVE))
+    .filterDate(from,to)
     .map(validGedi);
   // The GEDI mission did not record measurements during part of 2023-24.
   // Empty collection fallback prevents mosaic().select() band failures.
