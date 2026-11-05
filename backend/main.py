@@ -175,7 +175,7 @@ class AutomaticLocation(BaseModel):
     model_config = ConfigDict(extra="forbid")
     longitude: float = Field(ge=-180, le=180)
     latitude: float = Field(ge=-85, le=85)
-    observation_date: str = Field(min_length=10,max_length=10,pattern=r"^\\d{4}-\\d{2}-\\d{2}$")
+    observation_date: str = Field(min_length=10,max_length=10,pattern=r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
 
 @app.post("/api/observations/automatic")
 def automatic_observation(payload: AutomaticLocation):

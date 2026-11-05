@@ -24,7 +24,7 @@ BAND_ASSETS = {
     "B5": "rededge1", "B6": "rededge2", "B7": "rededge3",
     "B8": "nir", "B8A": "nir08", "B11": "swir16", "B12": "swir22"
 }
-CLEAR_SCL = {2, 4, 5, 6, 7}
+CLEAR_SCL = {4, 5, 6, 7}
 MAX_SCENES = 6
 
 class SourceError(Exception):
