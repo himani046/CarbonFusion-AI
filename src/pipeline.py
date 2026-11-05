@@ -100,7 +100,7 @@ def run_experiment(csv_path, output_dir, seed=42, block_deg=0.08):
                'notes': ['GEDI AGBD is modeled reference data, not field truth.',
                          'Spatial groups help limit leakage; this is not fully buffered spatial CV.',
                          'Intervals are marginal and not guaranteed under geographic shift.',
-                         'All demo sample rows are synthetic until real Earth Engine export is supplied.']}
+                         'Data provenance must be checked for each input CSV; GEDI labels are modeled and are not field ground truth.']}
     with open(out/'metrics.json', 'w') as f:
         json.dump(results, f, indent=2)
     test_out = holdout[['longitude','latitude','agbd','agbd_se','spatial_block']].copy()

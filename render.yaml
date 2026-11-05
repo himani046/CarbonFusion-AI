@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: carbonfusion-ai-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r backend/requirements-deploy.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: CARBONFUSION_OUTPUT_DIR
+        value: deployment/artifacts
+      - key: CARBONFUSION_DATA_MODE
+        value: real
+      - key: CARBONFUSION_CORS_ORIGINS
+        value: "*"
+  - type: web
+    name: carbonfusion-ai-dashboard
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run generate
+    staticPublishPath: .output/public
+    envVars:
+      - key: NUXT_PUBLIC_API_BASE
+        sync: false
