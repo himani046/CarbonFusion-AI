@@ -157,3 +157,8 @@ The extraction/merge scripts cannot automatically download data from your Google
 ### Extended 2018–2026 study window
 
 [Multi-year Earth Engine extraction script](earth_engine/export_2018_2026_window.js) and [availability / run guide](docs/OBSERVATION_WINDOW_2018_2026.md). GEDI L4A monthly labels are currently available only for 2019–mid-2025 in Earth Engine; 2018 and 2026 are **not** GEDI-labeled training periods. Annual exports use GEDI-targeted stratified pixel sampling and need manual task execution in Earth Engine.
+
+
+### NASA GEDI L4A V3 HDF5 footprint extraction (no Earth Engine quota)
+
+Use [the V3 HDF5 extractor](scripts/extract_gedi_l4a_v3.py) and [the guide](docs/NASA_GEDI_V3_HDF5.md). It extracts quality-filtered GEDI biomass footprints in the Odisha study rectangle and writes a per-beam QA report. This GEDI-only output still needs Sentinel-2 optical joining before training.
