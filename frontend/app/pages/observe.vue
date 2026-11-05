@@ -35,8 +35,8 @@ async function submit(){
  const keys=['longitude','latitude','elevation','slope',...names]
  if(keys.some(k=>v[k]===''||!Number.isFinite(Number(v[k])))){error.value='Enter a valid numeric value for every field.';return}
  const data=Object.fromEntries(keys.map(k=>[k,Number(v[k])]))
- if(data.latitude!>=-90||data.latitude!<=90||data.longitude!>=-180||data.longitude!<=180){error.value='Latitude must be -90 to 90 and longitude -180 to 180.';return}
- if(names.some(k=>data[k]!<0||data[k]!>1)){error.value='Enter Sentinel-2 surface reflectance as fractions between 0 and 1 (not raw integers).';return}
+ if(data.latitude < -90 || data.latitude > 90 || data.longitude < -180 || data.longitude > 180){error.value='Latitude must be -90 to 90 and longitude -180 to 180.';return}
+ if(names.some(k=>data[k] < 0 || data[k] > 1)){error.value='Enter Sentinel-2 surface reflectance as fractions between 0 and 1 (not raw integers).';return}
  pending.value=true
  try{result.value=await $fetch<Prediction>(api+'/api/observations/predict',{method:'POST',body:data})}
  catch(e:any){error.value=e?.data?.detail||e?.message||'Unable to run inference.'}
