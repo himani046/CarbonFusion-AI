@@ -61,3 +61,10 @@ for granule in r['granules']:
 PY
 ```
 If `total_in_bbox` is positive but `output_rows` is zero, inspect per-beam missing fields rather than downloading unrelated new granules. Do not treat 0 passed QC as 0 geographic observations.
+
+
+## GEDI Version 3 quality fields (2026-11-05 correction)
+
+Release 3 uses `l4a_quality_flag_rel3` instead of V2 `l4_quality_flag`. The extractor resolves the V3 name first, and requires it to be 1. For geolocation quality it prefers `degrade_include_flag == 1` when present, otherwise legacy `degrade_flag == 0`. If present it also excludes `elev_highestreturn_outlier_flag != 0`. Existing finite positive AGBD, finite uncertainty and relative uncertainty <= 50% screens remain.
+
+NASA source: https://daac.ornl.gov/GEDI/guides/GEDI_L4A_AGB_Density_V3.html . Geographic matches do not guarantee quality-pass counts. The actual local extraction still needs to be rerun and validated.

@@ -16,13 +16,15 @@ FIELDS = {
     "latitude": ("lat_lowestmode", "latitude", "lat"),
     "agbd": ("agbd",),
     "agbd_se": ("agbd_se",),
-    "l4_quality_flag": ("l4_quality_flag",),
+    "l4_quality_flag": ("l4a_quality_flag_rel3", "l4_quality_flag"),
     "degrade_flag": ("degrade_flag",),
+    "degrade_include_flag": ("degrade_include_flag",),
+    "elev_highestreturn_outlier_flag": ("elev_highestreturn_outlier_flag",),
     "shot_number": ("shot_number",),
     "delta_time": ("delta_time",),
 }
 SENTINEL_REQUIRED = ("longitude","latitude","agbd","agbd_se",
-                     "l4_quality_flag","degrade_flag")
+                     "l4_quality_flag")
 
 def find_array(group, candidates, n=None):
     """Find a matching 1D dataset inside a beam (including nested groups).
@@ -102,10 +104,17 @@ def extract_one(path, bbox, max_relative_se):
             agbd=np.asarray(fields["agbd"],dtype=np.float64)
             se=np.asarray(fields["agbd_se"],dtype=np.float64)
             quality=np.asarray(fields["l4_quality_flag"])
-            degrade=np.asarray(fields["degrade_flag"])
             good=(np.isfinite(agbd)&np.isfinite(se)&(agbd>0)&(agbd<600)&
-                  (se>=0)&(se/agbd<=max_relative_se)&
-                  (quality==1)&(degrade==0))
+                  (se>=0)&(se/np.maximum(agbd,1e-9)<=max_relative_se)&
+                  (quality==1))
+            if "degrade_include_flag" in fields:
+                good &= np.asarray(fields["degrade_include_flag"])==1
+            elif "degrade_flag" in fields:
+                good &= np.asarray(fields["degrade_flag"])==0
+            else:
+                good &= False
+            if "elev_highestreturn_outlier_flag" in fields:
+                good &= np.asarray(fields["elev_highestreturn_outlier_flag"])==0
             frame=pd.DataFrame({key:array[good] for key,array in fields.items()})
             if not frame.empty:
                 frame["beam"]=beam_name
@@ -114,6 +123,8 @@ def extract_one(path, bbox, max_relative_se):
                 frame["observation_date"]=path.name.split("_")[2][:7] # YYYYDDD (granule start)
                 rows.append(frame)
             report["beams"][beam_name]={"status":"processed","length":n,
+                "quality_field":datasets["l4_quality_flag"][1],
+                "degradation_screen":"degrade_include_flag" if "degrade_include_flag" in fields else "legacy_degrade_flag",
                 "in_bbox":count_inside,"quality_passed":int(good.sum()),
                 "paths":{k:v[1] for k,v in datasets.items()}}
     out=pd.concat(rows,ignore_index=True) if rows else pd.DataFrame(
