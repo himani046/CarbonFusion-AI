@@ -1,0 +1,43 @@
+{
+  "data": {
+    "rows_after_qc": 1263,
+    "fit_rows": 576,
+    "calibration_rows": 413,
+    "test_rows": 274,
+    "spatial_blocks": 22,
+    "block_degrees": 0.08
+  },
+  "comparison": [
+    {
+      "model": "random_forest_optical",
+      "mae_mg_ha": 24.033286395408677,
+      "rmse_mg_ha": 32.08959422630292,
+      "r2": -0.12018062127731466
+    },
+    {
+      "model": "xgboost_optical",
+      "mae_mg_ha": 24.705148223901904,
+      "rmse_mg_ha": 33.66861231651171,
+      "r2": -0.233133335112373
+    },
+    {
+      "model": "xgboost_optical_terrain",
+      "mae_mg_ha": 25.409091113598453,
+      "rmse_mg_ha": 33.991905744597595,
+      "r2": -0.25692866880267795
+    }
+  ],
+  "uncertainty": {
+    "method": "split_conformal_absolute_residual",
+    "nominal_coverage": 0.9,
+    "empirical_test_coverage": 0.8832116788321168,
+    "mean_interval_width_mg_ha": 95.07272338867188,
+    "calibration_half_width_mg_ha": 47.70178176025391
+  },
+  "notes": [
+    "GEDI AGBD is modeled reference data, not field truth.",
+    "Spatial groups help limit leakage; this is not fully buffered spatial CV.",
+    "Intervals are marginal and not guaranteed under geographic shift.",
+    "Public demonstration: real GEDI V3 satellite-derived reference labels from one granule; preliminary geographic validation, not field truth."
+  ]
+}

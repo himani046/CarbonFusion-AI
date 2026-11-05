@@ -1,0 +1,24 @@
+{
+  "features": [
+    "B2",
+    "B3",
+    "B4",
+    "B5",
+    "B6",
+    "B7",
+    "B8",
+    "B8A",
+    "B11",
+    "B12",
+    "ndvi",
+    "ndmi",
+    "ndre",
+    "elevation",
+    "slope"
+  ],
+  "conformal_half_width": 47.70178176025391,
+  "carbon_fraction": 0.47,
+  "model": "xgboost_optical_terrain",
+  "input_provenance": "manual_optical_features",
+  "limitations": "Single GEDI granule prototype; negative R2 on geographic holdout"
+}
