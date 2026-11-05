@@ -13,6 +13,17 @@ const pct=(num:number|null|undefined)=>num==null?'—':(num*100).toFixed(1)+'%'
 const num=(x:number|null|undefined,dec=1)=>x==null?'—':x.toLocaleString(undefined,{maximumFractionDigits:dec})
 const friendly=(id:string)=>id.replace('random_forest','Random Forest').replace('xgboost','XGBoost').replaceAll('_',' ')
 const active=ref('overview')
+function navigate(section: 'overview' | 'map' | 'models') {
+  active.value = section
+  if (section === 'overview') {
+    if (import.meta.client) window.scrollTo({ top: 0, behavior: 'smooth' })
+    return
+  }
+  if (import.meta.client) {
+    const id = section === 'map' ? 'geo-map' : 'models'
+    window.requestAnimationFrame(() => window.document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }
+}
 async function reload(){await Promise.all([refreshHealth(),refreshSummary(),refreshPoints()])}
 </script>
 
@@ -25,9 +36,9 @@ async function reload(){await Promise.all([refreshHealth(),refreshSummary(),refr
     </div>
     <div class="nav-group">
       <div class="group-label">Workspace</div>
-      <button class="nav-item" :class="{active:active==='overview'}" @click="active='overview'"><BarChart3 :size="17"/> Overview</button>
-      <button class="nav-item" :class="{active:active==='map'}" @click="active='map';$nextTick(()=>document.getElementById('geo-map')?.scrollIntoView({behavior:'smooth'}))"><MapPinned :size="17"/> Geo Explorer</button>
-      <button class="nav-item" :class="{active:active==='models'}" @click="active='models';$nextTick(()=>document.getElementById('models')?.scrollIntoView({behavior:'smooth'}))"><FlaskConical :size="17"/> Research Lab</button>
+      <button class="nav-item" :class="{active:active==='overview'}" @click="navigate('overview')"><BarChart3 :size="17"/> Overview</button>
+      <button class="nav-item" :class="{active:active==='map'}" @click="navigate('map')"><MapPinned :size="17"/> Geo Explorer</button>
+      <button class="nav-item" :class="{active:active==='models'}" @click="navigate('models')"><FlaskConical :size="17"/> Research Lab</button>
       <button class="nav-item" disabled title="Future research module"><TriangleAlert :size="17"/> Carbon Risk <span class="nav-tag">Soon</span></button>
       <div class="group-label" style="margin-top:26px">Research assets</div>
       <a class="nav-item" href="https://github.com/himani046/CarbonFusion-AI" target="_blank" rel="noopener"><BookOpen :size="17"/> Documentation <ArrowUpRight :size="13" style="margin-left:auto"/></a>
