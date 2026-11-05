@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { Leaf, ArrowLeft, MapPin, Satellite, FlaskConical, ShieldAlert, Send, RotateCcw } from 'lucide-vue-next'
 type Prediction = {longitude:number,latitude:number,pred_agbd_mg_ha:number,interval_low_mg_ha:number,interval_high_mg_ha:number,carbon_density_t_ha:number,ndvi:number,ndmi:number,ndre:number,warning:string}
 const config=useRuntimeConfig()
-const api=String(config.public.apiBase).replace(/\\/$/,'')
+const api=String(config.public.apiBase).replace(/[/]$/,'')
 const names=['B2','B3','B4','B5','B6','B7','B8','B8A','B11','B12'] as const
 const values=ref<Record<string,string>>({longitude:'',latitude:'',elevation:'',slope:'',...Object.fromEntries(names.map(n=>[n,'']))})
 const status=ref<{available:boolean,satellite_auto_fetch:boolean}|null>(null)
