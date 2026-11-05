@@ -1,0 +1,96 @@
+# CarbonFusion AI — Research MVP (Phase 1)
+
+**Theme B — AI/ML & Data-Driven Models for Climate Prediction**  
+**Project:** Uncertainty-aware forest aboveground biomass and carbon estimation using Sentinel-2 imagery and NASA GEDI L4A.
+
+> **Research status:** Phase 1 is an offline, reproducible **synthetic-data test harness** plus a Google Earth Engine export script for sourcing real observations. **The models have not yet been validated with real forest observations.** This repository does NOT yet include the future-deforestation forecast model.
+
+## Research objectives
+1. Estimate aboveground biomass density (AGBD, Mg/ha) using Sentinel-2 spectral and vegetation features, supervised by GEDI-modeled biomass observations.
+2. Evaluate Random Forest and XGBoost baselines using geographically separated train/calibration/test groups.
+3. Estimate prediction uncertainty with a 90% split-conformal interval, report coverage and interval width.
+4. Prepare future research on spatial carbon-stock mapping and time-forward deforestation-risk prediction.
+
+## Scientific framing
+- **Main research question:** Can uncertainty-aware, spatially validated models improve reliability of satellite-derived forest biomass estimates?
+- **H1:** Optical + terrain features may improve AGBD estimation over optical-only baselines.
+- **H2:** Separately calibrated prediction intervals can quantify held-out reference prediction uncertainty.
+- **H3:** Spatial holdouts offer a tougher test of geographic generalization than random point splitting.
+
+GEDI AGBD is a **modeled reference**, not direct field truth. Using GEDI targets in both experiments alone does not establish gains due to LiDAR-derived predictors. The implemented models use GEDI as labels; no continuous GEDI structural-predictor fusion is currently claimed.
+
+## Implemented modules
+- Synthetic sample generator for testing processing only.
+- Dataset validation and GEDI quality filters.
+- Random Forest on Sentinel-2 optical features.
+- XGBoost on optical features.
+- XGBoost on optical and terrain features.
+- Geographic block splits into model-fitting, calibration, and test groups.
+- RMSE / MAE / R² model comparisons and split-conformal 90% prediction intervals.
+- Estimated aboveground carbon density from biomass (illustrative fraction 0.47).
+- Streamlit visualization of held-out predictions.
+- Earth Engine JavaScript for Sentinel-2 + GEDI L4A V2.1 sample CSV export.
+- Small automated tests.
+
+## Quick start
+Python 3.10+:
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python scripts/make_demo_data.py
+python -m scripts.train
+streamlit run app.py
+```
+Results are written to `outputs/metrics.json`, `outputs/heldout_predictions.csv` and `outputs/biomass_model.joblib`. These are ignored by Git.
+
+## Real satellite data
+1. Open https://code.earthengine.google.com/ and paste `earth_engine/export_samples.js`.
+2. Adjust the illustrative Similipal-region rectangle, dates, and sampling configuration.
+3. Run the Earth Engine script and start its Drive CSV export.
+4. Download the CSV into `data/real_samples.csv`.
+5. Train using:
+```bash
+python -m scripts.train --input data/real_samples.csv --output outputs/real
+```
+**Research precautions:** The export is a convenience prototype using yearly Sentinel-2 and mosaicked GEDI data, not rigorous footprint-by-footprint temporal matching. Before reporting scientific results, align acquisition dates, footprints, resolution and forest types; evaluate sampling bias, buffered spatial CV, field validation and carbon-stock aggregation uncertainty.
+
+### Expected CSV fields
+`longitude, latitude, agbd, agbd_se, B2, B3, B4, B5, B6, B7, B8, B8A, B11, B12, ndvi, ndmi, ndre, elevation, slope`
+
+Optical bands are unit-scaled reflectance. AGBD and its standard error are in Mg/ha.
+
+## Research architecture
+Sentinel-2 optical data + GEDI sampled AGBD + elevation/slope → quality filtering & feature matching → grouped geographic model training → independent calibration → held-out evaluation → AGBD estimates + prediction intervals → approximate aboveground carbon density.
+
+**Future extension (not implemented):** Historical forest-loss labels + environmental and accessibility covariates → time-forward deforestation probability model → carbon-at-risk scenario analysis.
+
+## Key limitations
+- The block size (`--block-deg 0.08`) uses latitude/longitude bins, not equal-area or spatially buffered CV.
+- Conformal coverage is calculated against GEDI-modeled reference values and does not automatically incorporate all GEDI errors or spatial distribution shift.
+- Carbon fraction 0.47 is illustrative and must be justified for selected forest types.
+- CO₂-equivalent *stock* is not actual emissions or automatically verified carbon credits.
+- All generated example performance values are **synthetic test outcomes**, not real research results.
+
+## Files
+```
+app.py
+src/pipeline.py
+scripts/train.py
+scripts/make_demo_data.py
+earth_engine/export_samples.js
+tests/test_pipeline.py
+requirements.txt
+.gitignore
+```
+
+## Next steps
+- **Phase 1B:** Acquire real GEDI + Sentinel-2 samples with verified spatial/temporal matching.
+- **Phase 2:** Spatially buffered CV, calibrated uncertainty, ablation/SHAP experiments and independent validation.
+- **Phase 3:** Produce spatial biomass and carbon-stock maps, propagate aggregate uncertainty.
+- **Phase 4:** Train and validate a distinct future-deforestation-risk model, then calculate scenario-based carbon at risk.
+
+## Official data
+- [Sentinel-2 SR Harmonized](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED)
+- [GEDI L4A V2.1 monthly Earth Engine data](https://developers.google.com/earth-engine/datasets/catalog/LARSE_GEDI_GEDI04_A_002_MONTHLY)
+- [NASA GEDI L4A V3 documentation](https://daac.ornl.gov/GEDI/guides/GEDI_L4A_AGB_Density_V3.html)
