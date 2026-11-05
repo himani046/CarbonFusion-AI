@@ -138,3 +138,17 @@ CARBONFUSION_OUTPUT_DIR="$(pwd)/outputs/real" CARBONFUSION_DATA_MODE=real python
 ```
 
 For Nuxt, set `NUXT_PUBLIC_API_BASE=http://localhost:8001` in `frontend/.env`.
+
+
+## Expanded real-observation sampling (Phase 1B update)
+
+The initial Earth Engine CSV contained **11** observations for 2022. Use the new [expanded Earth Engine extractor](earth_engine/export_expanded_samples.js) to collect more candidate samples with a larger study area, configurable annual exports, an optional tree-cover mask and diagnostic monthly counts. See [expanded extraction guide](docs/EXPANDED_DATA_EXTRACTION.md).
+
+```bash
+# Once exported CSVs have been downloaded into data/:
+python -m scripts.merge_real_exports --inputs data/carbonfusion_gedi_s2_2022_expanded.csv data/carbonfusion_gedi_s2_2023_expanded.csv --output data/real_samples.csv
+python -m scripts.validate_real_data --input data/real_samples.csv
+python -m scripts.train --input data/real_samples.csv --output outputs/real
+```
+
+The extraction/merge scripts cannot automatically download data from your Google account. Sample counts and eventual model accuracy are not guaranteed. GEDI L4A labels remain modeled references; this is not field-validated forest carbon monitoring.
