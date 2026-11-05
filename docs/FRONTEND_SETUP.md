@@ -56,3 +56,20 @@ The UI includes:
 
 ## 4. Next research work
 Use `earth_engine/export_samples.js` for initial GEDI–Sentinel sample acquisition, then improve footprint and temporal matching, quality control, spatially buffered evaluation, and field validation. Add real continuous biomass raster tiles only after validated inference, and implement future deforestation predictions as a separate research module.
+
+## Troubleshooting: blank dashboard, wrong API port, or Vue navigation TypeError
+
+If the frontend shows `[GET] http://localhost:8000/api/overview: Failed to fetch`, check your FastAPI port. If FastAPI runs on 8001, create `frontend/.env`:
+
+```env
+NUXT_PUBLIC_API_BASE=http://localhost:8001
+```
+
+Stop Nuxt (Ctrl+C), restart from `frontend/` with `npm run dev`, and refresh the browser. Check `http://localhost:8001/api/health`. If `ready:false`, generate local synthetic test outputs from repository root:
+
+```bash
+python scripts/make_demo_data.py
+python -m scripts.train
+```
+
+Do not confuse model-output absence (HTTP 503) with server connection failure (no response). If the navigation previously displayed `getElementById` errors, pull the latest `main` changes; Geo Explorer and Research Lab now use client-safe Vue click handlers.
